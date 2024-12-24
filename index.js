@@ -31,7 +31,11 @@ async function run(){
 
             app.post('/allVisa',async(req,res)=>{
                 const data = req.body;
-                const result = await visaInfo.insertOne(data);
+                const allVisas = await visaInfo.find().toArray();
+                const newData = {...data,id:allVisas.length + 1}
+                  
+                 
+                const result = await visaInfo.insertOne(newData);
                 res.send(result);
 
             })
@@ -64,6 +68,31 @@ async function run(){
             app.get('/visaApplication',async(req,res)=>{
                 const result = await visaApplicationData.find().toArray();
                 res.send(result);
+            })
+
+            app.patch('/allVisa/:id',async(req,res)=>{
+                const id = req.params.id;
+                console.log(id)
+                const query = {_id:new ObjectId(id)}
+                const data = req.body;
+                const update = {
+                    $set:{
+                        countryImage:data.countryImage,
+                        countryName:data.countryName,
+                        visaType:data.visaType,
+                        processingTime:data.processingTime,
+                        requiredDocuments:data.requiredDocuments,
+                        description:data.description,
+                        ageRestriction:data.ageRestriction,
+                        fee:data.fee,
+                        validity:data.validity,
+                        applicationMethod:data.applicationMethod
+
+                         }
+                }
+
+                const result = await visaInfo.updateOne(query,update)
+                res.send(result)
             })
 
     }catch(err){
