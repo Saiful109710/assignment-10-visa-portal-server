@@ -28,6 +28,7 @@ async function run(){
     try{
             const visaInfo = client.db('visaInfo').collection('visaType')
             const visaApplicationData =client.db('visaInfo').collection('visaApplicationData') 
+            const userCollection = client.db('visaInfo').collection('users')
 
             app.post('/allVisa',async(req,res)=>{
                 const data = req.body;
@@ -38,18 +39,20 @@ async function run(){
                 const result = await visaInfo.insertOne(newData);
                 res.send(result);
 
-            })
+                })
 
             app.post('/visaApplication',async(req,res)=>{
                 const data = req.body;
                 const result = await visaApplicationData.insertOne(data);
                 res.send(result)
-            })
+                 })
+
+            
 
             app.get('/allVisa',async(req,res)=>{
                 const result = await visaInfo.find().toArray();
                 res.send(result)
-            })
+                })
 
             app.get('/allVisa/:id',async(req,res)=>{
                     const id = req.params.id
@@ -57,18 +60,32 @@ async function run(){
                     const result = await visaInfo.findOne(query);
                     console.log(result)
                     res.send(result);
-            })
+                })
 
             app.get('/latestVisa',async(req,res)=>{
                 const result = await visaInfo.find().limit(6).toArray();
                 res.send(result)
 
-            })
+                 })
+
+             app.get('/myAddedVisa',async(req,res)=>{
+                const email = req.headers.email;
+                
+                const result = await visaInfo.find({email}).toArray()
+                res.send(result)
+             })    
 
             app.get('/visaApplication',async(req,res)=>{
                 const result = await visaApplicationData.find().toArray();
                 res.send(result);
-            })
+                })
+
+             app.get('/myVisaApplication',async(req,res)=>{
+                const email = req.headers.email
+                console.log(email)
+                const result = await visaApplicationData.find({email}).toArray()
+                res.send(result)
+             })   
 
             app.patch('/allVisa/:id',async(req,res)=>{
                 const id = req.params.id;
@@ -93,13 +110,44 @@ async function run(){
 
                 const result = await visaInfo.updateOne(query,update)
                 res.send(result)
-            })
+                })
+
+                app.delete('/allVisa/:id',async(req,res)=>{
+                    const {id} = req.params;
+                    const query = {_id:new ObjectId(id)};
+                    const result = await visaInfo.deleteOne(query);
+                    res.send(result);
+                })
+
+                app.delete('/visaApplication/:id',async(req,res)=>{
+
+                    const {id} = req.params;
+                    console.log(id)
+                    const query = {_id:new ObjectId(id)};
+                    const result = await visaApplicationData.deleteOne(query);
+                    console.log(result)
+                    res.send(result);
+                })
+
+                // user db api
+                app.post('/users',async(req,res)=>{
+                    const data = req.body;
+                    const result = await userCollection.insertOne(data);
+                    res.send(result)
+                })
+                
+                app.get('/user',async(req,res)=>{
+                    const result = await userCollection.find().toArray();
+                    res.send(result);
+                })
+
+                console.log('connect to db')
 
     }catch(err){
         console.log(err)
     }
 
-    console.log('connect to db')
+    
 }
 
 run()
