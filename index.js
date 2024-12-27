@@ -82,8 +82,13 @@ async function run(){
 
              app.get('/myVisaApplication',async(req,res)=>{
                 const email = req.headers.email
-                console.log(email)
-                const result = await visaApplicationData.find({email}).toArray()
+                const search = req.query.search || ""
+                const query = {
+                    email,
+                    countryName:{$regex:search,$options:'i'}
+                }
+                
+                const result = await visaApplicationData.find(query).toArray()
                 res.send(result)
              })   
 
